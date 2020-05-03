@@ -14,7 +14,7 @@ public class Robot_Adaptive_Auto_Class {
      * 有时，有些拓展并不想在框架启动阶段被加载，而是希望在拓展方法被调用时，根据运行时参数进行加载
      */
     public class Robot$Adaptive implements com.qpm.dubbo.test.spi.Robot {
-        public void sayHelloAndReturnSelf(org.apache.dubbo.common.URL arg0)  {
+        public Robot sayHelloAndReturnSelf(org.apache.dubbo.common.URL arg0)  {
             // 1、URL 参数是否为 null， 因此 URL 参数是必须的
             if (arg0 == null)
                 throw new IllegalArgumentException("url == null");
@@ -30,7 +30,7 @@ public class Robot_Adaptive_Auto_Class {
                     = (com.qpm.dubbo.test.spi.Robot)ExtensionLoader.getExtensionLoader(com.qpm.dubbo.test.spi.Robot.class).getExtension(extName);
 
             // 4、执行实例方法
-            extension.sayHelloAndReturnSelf(arg0);
+            return extension.sayHelloAndReturnSelf(arg0);
         }
     }
 

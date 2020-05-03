@@ -89,7 +89,7 @@ class RobotTest {
     public void testAdaptive() {
         System.out.println("Dubbo SPI Adaptive ");
         ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
-        Robot autoRobot = extensionLoader.getAdaptiveExtension();
+        Robot autoRobot = extensionLoader.getAdaptiveExtension();   // 源码从这里开始读
         assertTrue(
                 autoRobot.sayHelloAndReturnSelf(URL.valueOf("dubbo://127.0.0.1:20880/RobotService?robot=bumblebee"))
                 instanceof
@@ -102,5 +102,14 @@ class RobotTest {
                 OptimusPrime);
         // console：hello, I am Optimus Prime.
     }
+
+    /**
+     * 自激活(被动激活) 机制实现
+     *
+     */
+    public void testActivate() {
+
+    }
+
 
 }
