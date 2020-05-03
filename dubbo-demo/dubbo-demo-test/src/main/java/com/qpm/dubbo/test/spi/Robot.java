@@ -1,5 +1,7 @@
 package com.qpm.dubbo.test.spi;
 
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.extension.Adaptive;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
@@ -12,5 +14,12 @@ import org.apache.dubbo.common.extension.SPI;
 @SPI("bumblebee")
 public interface Robot {
 
-    void sayHello();
+    /**
+     * sayHelloAndReturnSelf 方法
+     *
+     * @PARAM URL 为了设置 自适应 方法
+     * @Return Robot 返回自身实现类
+     */
+    @Adaptive
+    Robot sayHelloAndReturnSelf(URL url);
 }

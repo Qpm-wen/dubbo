@@ -1,5 +1,6 @@
 package com.qpm.dubbo.test.spi;
 
+import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.junit.jupiter.api.Test;
 
@@ -22,9 +23,9 @@ class RobotTest {
         System.out.println("Dubbo SPI");
         ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
         Robot optimusPrime = extensionLoader.getExtension("optimusPrime");
-        optimusPrime.sayHello();
+        optimusPrime.sayHelloAndReturnSelf(null);
         Robot bumblebee = extensionLoader.getExtension("bumblebee");
-        bumblebee.sayHello();
+        assertTrue(bumblebee.sayHelloAndReturnSelf(null) instanceof Bumblebee);
     }
 
     /**
@@ -57,7 +58,7 @@ class RobotTest {
     public void testWrapperAndMultiWrapper() {
         System.out.println("Dubbo SPI Wrapper adn Multi Wrapper");
         ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
-        extensionLoader.getDefaultExtension().sayHello();
+        extensionLoader.getDefaultExtension().sayHelloAndReturnSelf(null);
         // 双层 Wrapper console:
         /*
             First Robot first Wrapper： before sayHello
@@ -66,6 +67,40 @@ class RobotTest {
             Second Robot first Wrapper： after sayHello
             First Robot first Wrapper： after sayHello
          */
+    }
+
+    /**
+     * 测试 自适应方法
+     * 注意:
+     * 1 被 {@link org.apache.dubbo.common.extension.Adaptive} 注解的方法，一定要带有 {@link org.apache.dubbo.common.URL 参数}
+     * not found url parameter or url attribute in parameters of method sayHello
+     *
+     * 测试步骤：
+     * 0 注释上述包装类测试用例
+     * 1 为 sayHello 方法增加 {@link org.apache.dubbo.common.extension.Adaptive} 注解，并加上 {@link URL} 参数
+     * 2 通过 URL 调用测试用例
+     *
+     * 原理：
+     * extensionLoader.getAdaptiveExtension(); 返回的是一个 Dubbo SPI 自己生成的类，在这里测试用例，生成的代码
+     * 已经贴在 {@link Robot_Adaptive_Auto_Class}，具体的调用细节可以跳转查看
+     *
+     */
+    @Test
+    public void testAdaptive() {
+        System.out.println("Dubbo SPI Adaptive ");
+        ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
+        Robot autoRobot = extensionLoader.getAdaptiveExtension();
+        assertTrue(
+                autoRobot.sayHelloAndReturnSelf(URL.valueOf("dubbo://127.0.0.1:20880/RobotService?robot=bumblebee"))
+                instanceof
+                Bumblebee);
+
+        // console: Hello, I am Bumblebee
+        assertTrue(
+                autoRobot.sayHelloAndReturnSelf(URL.valueOf("dubbo://127.0.0.1:20880/RobotService?robot=optimusPrime"))
+                instanceof
+                OptimusPrime);
+        // console：hello, I am Optimus Prime.
     }
 
 }

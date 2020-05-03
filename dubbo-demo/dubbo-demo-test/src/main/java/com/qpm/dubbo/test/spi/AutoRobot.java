@@ -1,15 +1,17 @@
 package com.qpm.dubbo.test.spi;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.extension.Adaptive;
 
 /**
  * @Author kangqiang.w
- * @Date 2020/5/1
+ * @Date 2020/5/3
  */
-public class Bumblebee implements Robot{
+public class AutoRobot implements Robot{
+
     @Override
     public Robot sayHelloAndReturnSelf(URL url) {
-        System.out.println("Hello, I am Bumblebee");
+        System.out.println("Adptive class");
         return this;
     }
 }

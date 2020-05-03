@@ -1,5 +1,7 @@
 package com.qpm.dubbo.test.spi;
 
+import org.apache.dubbo.common.URL;
+
 /**
  * Robot 扩展 第二层 Wrapper
  *
@@ -15,9 +17,10 @@ public class RobotSecondWrapper implements Robot{
     }
 
     @Override
-    public void sayHello() {
+    public Robot sayHelloAndReturnSelf(URL url) {
         System.out.println("Second Robot first Wrapper： before sayHello");
-        this.robot.sayHello();
+        this.robot.sayHelloAndReturnSelf(url);
         System.out.println("Second Robot first Wrapper： after sayHello");
+        return this;
     }
 }

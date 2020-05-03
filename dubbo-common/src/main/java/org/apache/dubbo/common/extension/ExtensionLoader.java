@@ -581,7 +581,7 @@ public class ExtensionLoader<T> {
                 instance = cachedAdaptiveInstance.get();
                 if (instance == null) {     // double check
                     try {
-                        instance = createAdaptiveExtension();   // 从这里切入
+                        instance = createAdaptiveExtension();   // 从这里切入，查看如何获得自适应类
                         cachedAdaptiveInstance.set(instance);
                     } catch (Throwable t) {
                         createAdaptiveInstanceError = t;
@@ -1057,7 +1057,9 @@ public class ExtensionLoader<T> {
     @SuppressWarnings("unchecked")
     private T createAdaptiveExtension() {
         try {
-            // 因为在加载配置阶段已经获得 Adaptive 自适应类了，所以可以直接通过反射构建
+            // getAdaptiveExtensionClass Dubbo SPI 构建类对象
+            // newInstance 通过反射构建
+            // injectExtension 依赖注入
             return injectExtension((T) getAdaptiveExtensionClass().newInstance());
         } catch (Exception e) {
             throw new IllegalStateException("Can't create adaptive extension " + type + ", cause: " + e.getMessage(), e);
@@ -1069,16 +1071,16 @@ public class ExtensionLoader<T> {
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+        // 构建类对象
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 
     /**
-     * 自适应类
+     * 自适应类的构建
      *
      * 步骤：
-     * 1、生成代理类代码 (XXX.java)
-     * 2、编译 (XXX.class)
-     * 3、加载类 (Class<XXX> 对象)
+     * 1、根据自适应的定义生成代理类代码 (XXX.java) 官方文档 https://dubbo.apache.org/zh-cn/docs/source_code_guide/adaptive-extension.html
+     * 2、编译成 (XXX.class) 并加载类 (Class<XXX> 对象)
      *
      * @return
      */
