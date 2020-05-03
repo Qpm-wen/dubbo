@@ -36,6 +36,10 @@ public class SpringExtensionFactory implements ExtensionFactory {
 
     private static final Set<ApplicationContext> CONTEXTS = new ConcurrentHashSet<ApplicationContext>();
 
+    /**
+     * 静态注入对象
+     * @param context
+     */
     public static void addApplicationContext(ApplicationContext context) {
         CONTEXTS.add(context);
         if (context instanceof ConfigurableApplicationContext) {
@@ -65,6 +69,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
             return null;
         }
 
+        // 从容器中获得 bean
         for (ApplicationContext context : CONTEXTS) {
             T bean = BeanFactoryUtils.getOptionalBean(context, name, type);
             if (bean != null) {
@@ -72,6 +77,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
             }
         }
 
+        // 从这里不难看出，Dubbo SPI 的 extension 和 Spring 的 bean 概念是类似的
         logger.warn("No spring extension (bean) named:" + name + ", try to find an extension (bean) of type " + type.getName());
 
         return null;

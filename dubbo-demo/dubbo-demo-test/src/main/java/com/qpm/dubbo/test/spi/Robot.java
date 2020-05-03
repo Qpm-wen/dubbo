@@ -9,7 +9,7 @@ import org.apache.dubbo.common.extension.SPI;
  * @Author kangqiang.w
  * @Date 2020/5/1
  */
-@SPI
+@SPI("bumblebee")
 public interface Robot {
 
     void sayHello();

@@ -30,9 +30,11 @@ import java.util.List;
 @Adaptive
 public class AdaptiveExtensionFactory implements ExtensionFactory {
 
-    private final List<ExtensionFactory> factories;
+    private final List<ExtensionFactory> factories;     // 有两个对象 fixme WHY
 
     public AdaptiveExtensionFactory() {
+        // 一个是 Dubbo SPI 本身的容器 (SpiExtensionFactory)，一个是 Spring 容器 (SpringExtensionFactory)
+        // 这里就意味着 SpringExtensionFactory 是被 Dubbo SPI 注册的
         ExtensionLoader<ExtensionFactory> loader = ExtensionLoader.getExtensionLoader(ExtensionFactory.class);
         List<ExtensionFactory> list = new ArrayList<ExtensionFactory>();
         for (String name : loader.getSupportedExtensions()) {
@@ -41,9 +43,18 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
         factories = Collections.unmodifiableList(list);
     }
 
+    /**
+     * 从容器中获取对象
+     *
+     * @param type object type.
+     * @param name object name.
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T getExtension(Class<T> type, String name) {
         for (ExtensionFactory factory : factories) {
+            // 从两个容器中获取实现
             T extension = factory.getExtension(type, name);
             if (extension != null) {
                 return extension;
