@@ -1,8 +1,12 @@
 package com.qpm.dubbo.test.spi;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.config.configcenter.Constants;
+import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -105,11 +109,61 @@ class RobotTest {
 
     /**
      * 自激活(被动激活) 机制实现
+     *  根据 URL 的配置，获得一系列的 扩展对象 Extension。
      *
      */
-    public void testActivate() {
-
+    @Test
+    public void testActivate_Single() {
+        System.out.println("Dubbo SPI Activate");
+        ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
+        List<Robot> robots = extensionLoader.getActivateExtension(
+                URL.valueOf("dubbo://127.0.0.1:20880/RobotService?robot=bumblebee"),
+                "robot"
+        );
+        assertEquals(1, robots.size());
     }
 
+    /**
+     * 自激活(被动激活) 机制实现
+     *  根据 URL 的配置，获得一系列的 扩展对象 Extension。
+     *
+     */
+    @Test
+    public void testActivate_Multi() {
+        System.out.println("Dubbo SPI Activate");
+        ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
+        List<Robot> robots = extensionLoader.getActivateExtension(
+                URL.valueOf("dubbo://127.0.0.1:20880/RobotService"),
+                new String[]{
+                        // 通过这个组合，会直接过滤默认值，假如设置了 bumblebee 做默认值，
+                        // 那机制不管是否设置 bumblebee ，都会返回 Activate 数组
+                        CommonConstants.REMOVE_VALUE_PREFIX + CommonConstants.DEFAULT_KEY,
+                        "optimusPrime",
+                        "bumblebee",
+                }
+        );
+        assertEquals(2, robots.size());
+    }
+
+
+    /**
+     * 自激活(被动激活) 机制实现
+     *  根据 URL 的配置，获得一系列的 扩展对象 Extension。
+     *
+     *  根据 group 值，做组级别过滤
+     *
+     */
+    @Test
+    public void testActivate_Group() {
+        System.out.println("Dubbo SPI Activate");
+        ExtensionLoader<Robot> extensionLoader = ExtensionLoader.getExtensionLoader(Robot.class);
+        // robot = autobot 的 扩展有两个，但 group = autobotLeader 只有一个
+        List<Robot> robots = extensionLoader.getActivateExtension(
+                URL.valueOf("dubbo://127.0.0.1:20880/RobotService?robot=autobot"),
+                new String[]{},
+                "autobotLeader"
+        );
+        assertEquals(1, robots.size());
+    }
 
 }

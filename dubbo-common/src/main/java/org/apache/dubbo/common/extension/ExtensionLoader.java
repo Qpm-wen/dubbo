@@ -246,7 +246,10 @@ public class ExtensionLoader<T> {
     /**
      * Get activate extensions.
      *
-     * 自激活实现
+     * 自激活实现。规则如下：
+     * 1、REMOVE_VALUE_PREFIX+name eg: "-name" 表示过滤掉某个 Extension
+     * 2、URL的K-V，可以和 @Activate 中的注解 value 进行匹配
+     * 3、group 参数指定 @Activate 的组别，和 2 一起进行匹配，两者关系为 且
      *
      * @param url    url
      * @param values extension point names
@@ -255,14 +258,17 @@ public class ExtensionLoader<T> {
      * @see org.apache.dubbo.common.extension.Activate
      */
     public List<T> getActivateExtension(URL url, String[] values, String group) {
+        // 最终返回的激活扩展点列表
         List<T> activateExtensions = new ArrayList<>();
         List<String> names = values == null ? new ArrayList<>(0) : Arrays.asList(values);
+        // 名字中不包含 "-default"
         if (!names.contains(REMOVE_VALUE_PREFIX + DEFAULT_KEY)) {
             getExtensionClasses();
             for (Map.Entry<String, Object> entry : cachedActivates.entrySet()) {
                 String name = entry.getKey();
                 Object activate = entry.getValue();
 
+                // 获取 group、activateGroup
                 String[] activateGroup, activateValue;
 
                 if (activate instanceof Activate) {
@@ -275,9 +281,11 @@ public class ExtensionLoader<T> {
                 } else {
                     continue;
                 }
-                if (isMatchGroup(group, activateGroup)
+                if (isMatchGroup(group, activateGroup)      // 匹配组是否一致
                         && !names.contains(name)
+                        // REMOVE_VALUE_PREFIX+name 表示直接过滤掉某个 扩展类 (刻意不选择)
                         && !names.contains(REMOVE_VALUE_PREFIX + name)
+                        // isActive 判断是否激活
                         && isActive(activateValue, url)) {
                     activateExtensions.add(getExtension(name));
                 }
@@ -285,6 +293,8 @@ public class ExtensionLoader<T> {
             // 设置排序
             activateExtensions.sort(ActivateComparator.COMPARATOR);
         }
+
+        // 自激活不一定要走 K-V 匹配，也可以直接通过 Extensions.name 直接进行匹配，这时候就不一定需要 @Activate 注解了
         List<T> loadedExtensions = new ArrayList<>();
         for (int i = 0; i < names.size(); i++) {
             String name = names.get(i);
@@ -292,6 +302,7 @@ public class ExtensionLoader<T> {
                     && !names.contains(REMOVE_VALUE_PREFIX + name)) {
                 if (DEFAULT_KEY.equals(name)) {
                     if (!loadedExtensions.isEmpty()) {
+                        // 假如是 default，则强行插入在 扩展链条 的第一位
                         activateExtensions.addAll(0, loadedExtensions);
                         loadedExtensions.clear();
                     }
