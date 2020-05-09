@@ -250,6 +250,7 @@ public class ExtensionLoader<T> {
      * 1、REMOVE_VALUE_PREFIX+name eg: "-name" 表示过滤掉某个 Extension
      * 2、URL的K-V，可以和 @Activate 中的注解 value 进行匹配
      * 3、group 参数指定 @Activate 的组别，和 2 一起进行匹配，两者关系为 且
+     * 4、2和3条件都不合适(扩展对象没写 @Activate 注解)，URL 提取出来的 value 匹配了 Extension 的 name
      *
      * @param url    url
      * @param values extension point names

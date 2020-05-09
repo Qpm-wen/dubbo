@@ -327,9 +327,11 @@ public class AdaptiveClassCodeGenerator {
      * get value of adaptive annotation or if empty return splitted simple name
      */
     private String[] getMethodAdaptiveValue(Adaptive adaptiveAnnotation) {
+        // 首先获取注解的 value 值，表示自适应 URL 中可以选择的参数
         String[] value = adaptiveAnnotation.value();
         // value is not set, use the value generated from class name as the key
         if (value.length == 0) {
+            // 假如没设置任何value，则使用扩展的SPI接口的名称，做默认参数
             String splitName = StringUtils.camelToSplitName(type.getSimpleName(), ".");
             value = new String[]{splitName};
         }
